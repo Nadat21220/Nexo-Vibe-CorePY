@@ -1,0 +1,50 @@
+=========================================================
+GUÍA DE INSTALACIÓN Y EJECUCIÓN - NEXOVIBE
+=========================================================
+
+Sigue estos pasos cuidadosamente para ejecutar el proyecto en tu computadora (tanto el Backend en Python como el Frontend en Next.js) sin errores.
+
+---------------------------------------------------------
+PASO 1: PREPARAR LA BASE DE DATOS (POSTGRESQL)
+---------------------------------------------------------
+1. Asegúrate de tener PostgreSQL instalado en tu computadora.
+2. Abre tu gestor de base de datos favorito (pgAdmin, DBeaver, o la terminal psql).
+3. Asegúrate de que el usuario 'postgres' tenga la contraseña configurada correctamente (por defecto el sistema espera "dAG172005%"). Si usas otra contraseña u otro puerto, deberás actualizar las credenciales en el archivo `appi_nexovibe.py` (función `get_db_connection()`).
+4. Abre el archivo `nexovibe_bd.sql` que viene incluido en este repositorio. Este archivo ya contiene TODAS las tablas actualizadas (incluyendo las columnas nuevas de proyectos como `progreso`, `prioridad`, `ias_usadas`, etc.).
+5. Ejecuta todo el script SQL para crear la base de datos `nexovibe_bd`, sus tablas, y cargar los datos iniciales.
+
+---------------------------------------------------------
+PASO 2: INICIAR EL BACKEND (PYTHON / FLASK)
+---------------------------------------------------------
+El Backend es la API de Python que se comunica con la base de datos.
+
+1. Asegúrate de tener Python instalado en tu computadora.
+2. Abre una terminal y dirígete a la carpeta raíz del proyecto.
+3. Instala las dependencias necesarias de Python ejecutando:
+   pip install flask flask-cors pg8000 python-dotenv
+4. Una vez instaladas las dependencias, inicia el servidor backend con el siguiente comando:
+   python appi_nexovibe.py
+5. Verás un mensaje indicando que el servidor está corriendo en http://localhost:5000. ¡No cierres esta terminal!
+
+---------------------------------------------------------
+PASO 3: INICIAR EL FRONTEND (NEXT.JS)
+---------------------------------------------------------
+El Frontend es la interfaz gráfica donde podrás interactuar con el sistema.
+
+1. Asegúrate de tener Node.js instalado en tu computadora.
+2. Abre una NUEVA ventana de terminal (manteniendo abierta la del Backend) y asegúrate de estar en la misma carpeta raíz del proyecto.
+3. Instala los módulos de Node ejecutando:
+   npm install
+4. Una vez completada la instalación, inicia el servidor de desarrollo ejecutando:
+   npm run dev
+5. El servidor se iniciará. Abre tu navegador web y dirígete a:
+   http://localhost:3000
+
+---------------------------------------------------------
+PASO 4: ACCESO AL SISTEMA
+---------------------------------------------------------
+Ya puedes iniciar sesión en el dashboard. 
+Puedes usar un correo electrónico de los usuarios preconfigurados en el archivo SQL según el rol que quieras probar.
+Por ejemplo: admin@nexovibe.com
+
+¡Todo listo! El sistema debería funcionar sin ningún problema de sincronización o base de datos.
