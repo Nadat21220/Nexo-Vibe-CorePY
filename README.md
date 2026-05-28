@@ -50,6 +50,9 @@ Para correr este proyecto en tu entorno local, asegúrate de tener [Node.js](htt
 
 
 
+**Gracias por Leer \(￣︶￣*\))**
+
+
  +88_
  
 _+880_
