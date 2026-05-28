@@ -45,7 +45,7 @@ Para correr este proyecto en tu entorno local, asegúrate de tener [Node.js](htt
    ```bash
     git clone https://github.com/Nadat21220/Nexo-Vibe-CorePY.git
    
-2. **Leer el 'Read_preview' **
+2. **Leer el 'Read_preview'**
 
 
 
