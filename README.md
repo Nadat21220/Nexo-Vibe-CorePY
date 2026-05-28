@@ -25,14 +25,27 @@ Este proyecto está construido con una arquitectura moderna basada en componente
   * Gestión de socios/clientes (`/api/socios`)
   * Administrador de tareas y Kanban (`/api/tasks`)
 
+# Nexo-Vibe-CorePY
+
+Repositorio central del proyecto Nexo-Vibe, enfocado en el desarrollo de backend y gestión de datos.
+
+## Descripción
+Este repositorio contiene la versión final y estable de la arquitectura del backend para Nexo-Vibe.
+
+## Estado del Proyecto
+*   **Rama principal**: `main` (Código base estable)
+*   **Entorno**: Digital Technologies / Backend
+
+
 ## 🚀 Instalación y Despliegue Local
 
 Para correr este proyecto en tu entorno local, asegúrate de tener [Node.js](https://nodejs.org/) instalado y sigue estos pasos:
 
 1. **Clona el repositorio:**
    ```bash
-   git clone [https://github.com/Nadat21220/Nexo-Vibe-CorePY.git](https://github.com/Nadat21220/Nexo-Vibe-CorePY.git)
-
+    git clone https://github.com/Nadat21220/Nexo-Vibe-CorePY.git
+   
+2. **Leer el 'Read_preview' **
 
 
 
