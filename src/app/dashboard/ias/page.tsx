@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
@@ -6,7 +7,6 @@ import { useAuth } from '@/context/AuthContext';
 // Removed mock import
 import {
   Bot,
-  Plus,
   X,
   Save,
   Cpu,

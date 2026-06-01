@@ -1,9 +1,10 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/context/AuthContext';
-import { BarChart, Users, UserPlus, Plus, X, Save, Upload, Edit3, Trash2, AlertTriangle, Eye, Search, Filter } from 'lucide-react';
+import { Users, UserPlus, X, Save, Upload, Edit3, Trash2, AlertTriangle, Eye, Search, Filter } from 'lucide-react';
 
 export default function SociosPage() {
   const { role } = useAuth();

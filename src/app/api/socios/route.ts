@@ -1,58 +1,78 @@
 import { NextResponse } from 'next/server';
-export const dynamic = 'force-dynamic';
 import { mockData } from '@/lib/data';
+import { query } from '@/lib/db';
 
-const ADMIN_EMAILS = new Set([
-  'tomas.cedillo@nexovibe.com', 'flor.sarmiento@nexovibe.com', 'marco.villasenor@nexovibe.com',
-  'julia.aguirre@nexovibe.com', 'ruben.montero@nexovibe.com', 'cecilia.padilla@nexovibe.com',
-  'victor.bravo@nexovibe.com', 'noemi.camacho@nexovibe.com', 'erick.valencia@nexovibe.com',
-  'mia.sotelo@nexovibe.com', 'gilberto.cuevas@nexovibe.com', 'romina.becerra@nexovibe.com'
-]);
+export const dynamic = 'force-dynamic';
+
+type ClienteRow = {
+  persona_id: number;
+  nombre: string;
+  apellido: string;
+  email: string;
+  cliente_id: number;
+  telefono: string | null;
+  direccion: string | null;
+  rango: string | null;
+  suscripcion: string | null;
+};
+
+type EmpleadoRow = {
+  persona_id: number;
+  nombre: string;
+  apellido: string;
+  email: string;
+  empleado_id: number;
+  rol: string | null;
+  salario: number | null;
+};
 
 export async function GET() {
   try {
-    const [resEmpleados, resClientes, resCreadores] = await Promise.all([
-      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/empleados`, { cache: 'no-store' }),
-      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/clientes`, { cache: 'no-store' }),
-      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/creadores`, { cache: 'no-store' })
-    ]);
-    const dataEmpleados = await resEmpleados.json();
-    const dataClientes = await resClientes.json();
-    const dataCreadores = await resCreadores.json();
+    const clientesResult = await query<ClienteRow>(
+      `SELECT p.id as persona_id, p.nombre, p.apellido, p.email, c.id as cliente_id, c.telefono, c.direccion, c.rango, c.suscripcion
+       FROM persona p
+       JOIN cliente c ON c.id_persona = p.id
+       ORDER BY p.nombre, p.apellido`
+    );
 
-    const normalEmpleados = dataEmpleados.success
-      ? dataEmpleados.empleados.map((e: any) => ({ ...e, id: `emp_${e.id}` }))
-      : [];
-    const allCreadores = dataCreadores.success ? dataCreadores.creadores : [];
-    
-    const creatorStaff = allCreadores.map((c: any) => {
-      const isAdmin = ADMIN_EMAILS.has(c.email.toLowerCase());
-      return {
-        id: `cre_${c.id}`,
-        nombre: c.nombre,
-        apellido: c.apellido,
-        email: c.email,
-        rol: isAdmin ? 'Administrador' : 'Creador UGC',
-        estado: 'ACTIVE'
-      };
-    });
+    const empleadosResult = await query<EmpleadoRow>(
+      `SELECT p.id as persona_id, p.nombre, p.apellido, p.email, e.id as empleado_id, e.rol, e.salario
+       FROM persona p
+       JOIN empleado e ON e.id_persona = p.id
+       ORDER BY p.nombre, p.apellido`
+    );
 
-    const combinedEmpleados = [...creatorStaff, ...normalEmpleados];
-    const normalClientes = dataClientes.success
-      ? dataClientes.clientes.map((c: any) => ({ ...c, id: `cli_${c.id}` }))
-      : [];
+    const clientes = clientesResult.rows.map((row) => ({
+      id: String(row.cliente_id),
+      nombre: row.nombre,
+      apellido: row.apellido,
+      email: row.email,
+      telefono: row.telefono,
+      direccion: row.direccion,
+      rango: row.rango,
+      suscripcion: row.suscripcion
+    }));
+
+    const empleados = empleadosResult.rows.map((row) => ({
+      id: String(row.empleado_id),
+      nombre: row.nombre,
+      apellido: row.apellido,
+      email: row.email,
+      rol: row.rol,
+      salario: row.salario
+    }));
 
     return NextResponse.json({
-      campanas: mockData.campanas,
-      clientes: normalClientes,
-      empleados: combinedEmpleados,
+      campanas: mockData.campanas || [],
+      clientes,
+      empleados
     });
   } catch (err) {
-    console.error("Error fetching socios from python API:", err);
+    console.error('Error fetching socios data:', err);
     return NextResponse.json({
-      campanas: mockData.campanas,
-      clientes: [],
-      empleados: [],
+      campanas: mockData.campanas || [],
+      clientes: mockData.clientes || [],
+      empleados: mockData.empleados || []
     });
   }
 }
@@ -60,52 +80,41 @@ export async function GET() {
 export async function POST(request: Request) {
   const body = await request.json();
   const { type, data } = body;
-  
-  try {
-    const endpoint = type === 'cliente' ? 'clientes' : 'empleados';
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/${endpoint}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    const resData = await res.json();
-    return NextResponse.json(resData);
-  } catch (err) {
-    console.error("Error creating via python API:", err);
-    return NextResponse.json({ success: false, message: "Error interno" }, { status: 500 });
+
+  if (!type || !data) {
+    return NextResponse.json({ success: false, message: 'Datos inválidos' }, { status: 400 });
   }
+
+  if (type === 'cliente') {
+    const newClient = { id: `cl_${Date.now()}`, ...data };
+    mockData.clientes.push(newClient);
+    return NextResponse.json({ success: true, cliente: newClient });
+  }
+
+  const newEmpleado = { id: `emp_${Date.now()}`, ...data };
+  mockData.empleados.push(newEmpleado);
+  return NextResponse.json({ success: true, empleado: newEmpleado });
 }
 
 export async function PUT(request: Request) {
   const body = await request.json();
   const { type, data } = body;
-  
-  try {
-    let endpoint = type === 'cliente' ? 'clientes' : 'empleados';
-    let cleanId = data.id;
-    if (data.id) {
-      if (data.id.startsWith('cre_')) {
-        endpoint = 'creadores';
-        cleanId = data.id.substring(4);
-      } else if (data.id.startsWith('emp_')) {
-        endpoint = 'empleados';
-        cleanId = data.id.substring(4);
-      } else if (data.id.startsWith('cli_')) {
-        endpoint = 'clientes';
-        cleanId = data.id.substring(4);
-      }
-    }
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/${endpoint}/${cleanId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...data, id: cleanId })
-    });
-    const resData = await res.json();
-    return NextResponse.json(resData);
-  } catch (err) {
-    console.error("Error updating via python API:", err);
-    return NextResponse.json({ success: false, message: "Error interno" }, { status: 500 });
+
+  if (!type || !data || !data.id) {
+    return NextResponse.json({ success: false, message: 'Datos inválidos' }, { status: 400 });
   }
+
+  if (type === 'cliente') {
+    const index = (mockData.clientes || []).findIndex((c) => c.id === data.id);
+    if (index === -1) return NextResponse.json({ success: false, message: 'Cliente no encontrado' }, { status: 404 });
+    mockData.clientes[index] = { ...mockData.clientes[index], ...data };
+    return NextResponse.json({ success: true, cliente: mockData.clientes[index] });
+  }
+
+  const index = (mockData.empleados || []).findIndex((e) => e.id === data.id);
+  if (index === -1) return NextResponse.json({ success: false, message: 'Empleado no encontrado' }, { status: 404 });
+  mockData.empleados[index] = { ...mockData.empleados[index], ...data };
+  return NextResponse.json({ success: true, empleado: mockData.empleados[index] });
 }
 
 export async function DELETE(request: Request) {
@@ -113,28 +122,19 @@ export async function DELETE(request: Request) {
   const id = searchParams.get('id');
   const type = searchParams.get('type');
 
-  if (!id || !type) return NextResponse.json({ success: false, message: "ID and Type are required" }, { status: 400 });
-
-  try {
-    let endpoint = type === 'cliente' ? 'clientes' : 'empleados';
-    let cleanId = id;
-    if (id.startsWith('cre_')) {
-      endpoint = 'creadores';
-      cleanId = id.substring(4);
-    } else if (id.startsWith('emp_')) {
-      endpoint = 'empleados';
-      cleanId = id.substring(4);
-    } else if (id.startsWith('cli_')) {
-      endpoint = 'clientes';
-      cleanId = id.substring(4);
-    }
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/${endpoint}/${cleanId}`, {
-      method: 'DELETE'
-    });
-    const resData = await res.json();
-    return NextResponse.json(resData);
-  } catch (err) {
-    console.error("Error deleting via python API:", err);
-    return NextResponse.json({ success: false, message: "Error interno" }, { status: 500 });
+  if (!id || !type) {
+    return NextResponse.json({ success: false, message: 'ID and Type are required' }, { status: 400 });
   }
+
+  if (type === 'cliente') {
+    const index = (mockData.clientes || []).findIndex((c) => c.id === id);
+    if (index === -1) return NextResponse.json({ success: false, message: 'Cliente no encontrado' }, { status: 404 });
+    mockData.clientes.splice(index, 1);
+    return NextResponse.json({ success: true });
+  }
+
+  const index = (mockData.empleados || []).findIndex((e) => e.id === id);
+  if (index === -1) return NextResponse.json({ success: false, message: 'Empleado no encontrado' }, { status: 404 });
+  mockData.empleados.splice(index, 1);
+  return NextResponse.json({ success: true });
 }

@@ -5,9 +5,9 @@ export const mockData = {
     { id: "c3", nombre_campana: "Marketing Engine V2", color: "#FFB800", status: "ACTIVE" },
   ],
   clientes: [
-    { id: "cl1", nombre: "Sarah", apellido: "Connor", email: "client@apple.com", rango: "normal" },
-    { id: "cl2", nombre: "Elon", apellido: "Mars", email: "client2@tesla.com", rango: "normal" },
-    { id: "cl3", nombre: "Tim", apellido: "Cook", email: "client3@apple.com", rango: "normal" },
+    { id: "cl1", nombre: "Sarah", apellido: "Connor", email: "client@apple.com", rango: "normal", suscripcion: "starter" },
+    { id: "cl2", nombre: "Elon", apellido: "Mars", email: "client2@tesla.com", rango: "normal", suscripcion: "pro" },
+    { id: "cl3", nombre: "Tim", apellido: "Cook", email: "client3@apple.com", rango: "normal", suscripcion: "enterprise" },
   ],
   empleados: [
     { id: "e1", nombre: "Alex", apellido: "Sterling", email: "admin@nexovibe.com", estado: "ACTIVE" },
@@ -123,5 +123,6 @@ export const mockData = {
   objetivos: [
     { id: "obj1", tipo: "alerta", titulo: "DATABASE MIGRATION", descripcion: "Alto impacto detectado (20h). Supervisión recomendada." },
     { id: "obj2", tipo: "cultura", titulo: "CULTURA INTERNA", descripcion: "Optimización de capacitación trimestral." }
-  ]
+  ],
+  eventos: [] as Array<Record<string, unknown>>
 };
