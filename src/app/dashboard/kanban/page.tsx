@@ -1,10 +1,11 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/context/AuthContext';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { Filter, Trash2, Plus, MessageSquare, Calendar, X, Save, Folder, Send, Paperclip, AlertTriangle } from 'lucide-react';
+import { Filter, Trash2, Plus, MessageSquare, Calendar, X, Save, Paperclip, AlertTriangle } from 'lucide-react';
 
 
 const PRIORITY_COLORS: Record<string, string> = {
@@ -27,7 +28,6 @@ export default function KanbanPage() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [empleados, setEmpleados] = useState<any[]>([]);
   const [clientes, setClientes] = useState<any[]>([]);
-  const [campanas, setCampanas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
@@ -87,7 +87,6 @@ export default function KanbanPage() {
       setTasks(finalTasks);
       setEmpleados(data.empleados || []);
       setClientes(data.clientes || []);
-      setCampanas(data.campanas || []);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching tasks', error);
@@ -709,7 +708,7 @@ export default function KanbanPage() {
             <h2 className="text-2xl font-bold uppercase tracking-wider text-white mb-2" style={{ fontFamily: 'var(--font-unbounded)' }}>¿ELIMINAR TAREA?</h2>
             <p className="text-surface-500 text-sm mb-6">
               Estás a punto de eliminar permanentemente la tarea:<br />
-              <strong className="text-white">"{taskToDelete.titulo}"</strong>.<br />
+              <strong className="text-white">&quot;{taskToDelete.titulo}&quot;</strong>.<br />
               ¿Estás seguro de esto? Esta acción no se puede deshacer.
             </p>
 

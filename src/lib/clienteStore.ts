@@ -1,9 +1,34 @@
 // src/lib/clienteStore.ts
 
-let _tasks: any[] = [];
+type ClienteSubscription = {
+  tier: string;
+  maxProjects: string;
+  startDate: string;
+  status: string;
+};
+
+type MockTask = {
+  id: string;
+  titulo: string;
+  descripcion: string;
+  estado: string;
+  prioridad: string;
+  asignado_a: string;
+  fecha_inicio: string;
+  fecha_limite: string;
+  progreso: number;
+  presupuesto_total: number;
+  presupuesto_utilizado: number;
+  empleados_asignados: string[];
+  cliente_email: string;
+  comentarios: unknown[];
+  [key: string]: unknown;
+};
+
+let _tasks: MockTask[] = [];
 let _initialized = false;
 
-let _clientSubscription = {
+let _clientSubscription: ClienteSubscription = {
   tier: 'Starter',
   maxProjects: '2 Proyectos',
   startDate: '2026-01-15',
@@ -67,7 +92,7 @@ export function getClienteTasks(email: string) {
   return [..._tasks];
 }
 
-export function mergeWithApiClient(apiTasks: any[], email: string) {
+export function mergeWithApiClient(apiTasks: MockTask[], email: string) {
   const local = getClienteTasks(email);
   // In a real app we'd filter apiTasks by cliente_email. For mock, we just use local.
   return local;

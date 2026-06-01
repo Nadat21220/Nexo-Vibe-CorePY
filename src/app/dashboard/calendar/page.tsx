@@ -1,10 +1,10 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, X, Clock, Trash2, Save, Info, EyeOff, Users, AlertCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, X, Clock, Trash2, Save, EyeOff, Users, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { getClientSubscription } from '@/lib/clienteStore';
 
 export default function CalendarPage() {
   const { user, role } = useAuth();
@@ -13,11 +13,9 @@ export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [eventos, setEventos] = useState<any[]>([]);
   const [proyectos, setProyectos] = useState<any[]>([]);
-  const [socios, setSocios] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [dayItems, setDayItems] = useState<any[]>([]);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
   const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
   
   const [isNewEventModalOpen, setIsNewEventModalOpen] = useState(false);
@@ -36,14 +34,12 @@ export default function CalendarPage() {
     const r = currentRole !== undefined ? currentRole : role;
     const e = currentEmail !== undefined ? currentEmail : user?.email;
     try {
-      const [resCal, resTasks, resSocios] = await Promise.all([
+      const [resCal, resTasks] = await Promise.all([
         fetch('/api/calendar', { cache: 'no-store' }),
-        fetch('/api/tasks', { cache: 'no-store' }),
-        fetch('/api/socios', { cache: 'no-store' })
+        fetch('/api/tasks', { cache: 'no-store' })
       ]);
       const dataCal = await resCal.json();
       const dataTasks = await resTasks.json();
-      const dataSocios = await resSocios.json();
       
       if (r === 'cliente') {
         const misEventos = (dataCal.eventos || []).filter((event: any) => event.autor === e && event.esPrivado);
@@ -62,7 +58,6 @@ export default function CalendarPage() {
       fetchedProyectos = fetchedProyectos.filter((p: any) => p.estado !== 'Finalizado');
       
       setProyectos(fetchedProyectos);
-      setSocios(dataSocios.socios || []);
     } catch (e) { console.error(e); }
   };
 

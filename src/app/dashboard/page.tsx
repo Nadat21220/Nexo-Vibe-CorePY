@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useEffect, useState } from 'react';
 import { Header } from '@/components/Header';
@@ -37,6 +38,7 @@ export default function Dashboard() {
       enterprise: { count: 0, name: 'Enterprise', desc: '' }
     }
   });
+  const [dbName, setDbName] = useState('nexovibe_bd');
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [urgentTasks, setUrgentTasks] = useState<any[]>([]);
@@ -63,6 +65,7 @@ export default function Dashboard() {
       const data = await res.json();
 
       let fetchedTasks = data.allTasks || [];
+      setDbName(data.dbName || 'nexovibe_bd');
       let currentUrgentTasks = data.urgentTasks || [];
 
       if (role === 'empleado' && user?.email) {
@@ -211,6 +214,7 @@ export default function Dashboard() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold uppercase tracking-wide text-foreground mb-1" style={{ fontFamily: 'var(--font-unbounded)' }}>RESUMEN</h1>
           <p className="text-surface-600 uppercase tracking-widest text-xs">PANEL DE INTELIGENCIA OPERATIVA</p>
+          <p className="text-xs text-surface-500 mt-2">Base de datos conectada: <strong className="text-white">{dbName}</strong></p>
         </div>
 
         {/* METRICS ROW */}

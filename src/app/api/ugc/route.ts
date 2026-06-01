@@ -3,19 +3,11 @@ export const dynamic = 'force-dynamic';
 import { mockData } from '@/lib/data';
 
 export async function GET() {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/creadores`, { cache: 'no-store' });
-    const data = await res.json();
-    return NextResponse.json({
-      creadores: data.success ? data.creadores : []
-    });
-  } catch (err) {
-    console.error("Error fetching creadores from python API:", err);
-    return NextResponse.json({
-      creadores: []
-    });
-  }
+  return NextResponse.json({
+    creadores: mockData.creadores || []
+  });
 }
+
 export async function POST(request: Request) {
   const body = await request.json();
   const { data } = body;
@@ -27,7 +19,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   const body = await request.json();
   const { data } = body;
-  const index = mockData.creadores.findIndex((u: any) => u.id === data.id);
+  const index = (mockData.creadores || []).findIndex((u) => u.id === data.id);
   if (index !== -1) {
     mockData.creadores[index] = { ...mockData.creadores[index], ...data };
     return NextResponse.json({ success: true, creador: mockData.creadores[index] });
@@ -39,7 +31,7 @@ export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
   if (id) {
-    const index = mockData.creadores.findIndex((u: any) => u.id === id);
+    const index = (mockData.creadores || []).findIndex((u) => u.id === id);
     if (index !== -1) {
       mockData.creadores.splice(index, 1);
       return NextResponse.json({ success: true });
