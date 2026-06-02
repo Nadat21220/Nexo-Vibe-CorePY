@@ -94,8 +94,6 @@ CREATE TABLE proyecto(
     presupuesto_total DECIMAL(10,2) DEFAULT 0,
     presupuesto_utilizado DECIMAL(10,2) DEFAULT 0,
     prioridad VARCHAR(20) DEFAULT 'low',
-    ias_usadas TEXT DEFAULT '',
-    detalles_proyecto TEXT DEFAULT '',
     --Validamos que la fecha de fin no sea antes que la fecha de inicio.
     CHECK(fecha_fin >= fecha_inicio)
 );
