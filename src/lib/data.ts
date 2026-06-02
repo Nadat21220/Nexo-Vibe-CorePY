@@ -5,9 +5,9 @@ export const mockData = {
     { id: "c3", nombre_campana: "Marketing Engine V2", color: "#FFB800", status: "ACTIVE" },
   ],
   clientes: [
-    { id: "cl1", nombre: "Sarah", apellido: "Connor", email: "client@apple.com", rango: "normal", suscripcion: "starter" },
+    { id: "cl1", nombre: "Sarah", apellido: "Connor", email: "client@apple.com", rango: "normal", suscripcion: "estandar" },
     { id: "cl2", nombre: "Elon", apellido: "Mars", email: "client2@tesla.com", rango: "normal", suscripcion: "pro" },
-    { id: "cl3", nombre: "Tim", apellido: "Cook", email: "client3@apple.com", rango: "normal", suscripcion: "enterprise" },
+    { id: "cl3", nombre: "Tim", apellido: "Cook", email: "client3@apple.com", rango: "normal", suscripcion: "platino" },
   ],
   empleados: [
     { id: "e1", nombre: "Alex", apellido: "Sterling", email: "admin@nexovibe.com", estado: "ACTIVE" },

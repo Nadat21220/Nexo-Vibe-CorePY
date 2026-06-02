@@ -29,8 +29,8 @@ let _tasks: MockTask[] = [];
 let _initialized = false;
 
 let _clientSubscription: ClienteSubscription = {
-  tier: 'Starter',
-  maxProjects: '2 Proyectos',
+  tier: 'estandar',
+  maxProjects: '1 Proyecto',
   startDate: '2026-01-15',
   status: 'Activa'
 };
@@ -41,7 +41,8 @@ export function getClientSubscription() {
 
 export function upgradeClientSubscription(tier: string) {
   let maxProjects = 'Ilimitado';
-  if (tier === 'Starter') maxProjects = '2 Proyectos';
+  if (tier === 'estandar') maxProjects = '1 Proyecto';
+  else if (tier === 'pro') maxProjects = '5 Proyectos';
   
   _clientSubscription = {
     ..._clientSubscription,

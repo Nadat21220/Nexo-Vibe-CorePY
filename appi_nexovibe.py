@@ -172,7 +172,7 @@ def get_clientes():
                 "telefono": row[4],
                 "direccion": row[5],
                 "rango": row[6] if row[6] else "normal",
-                "suscripcion": row[7] if row[7] else "starter"
+                "suscripcion": row[7] if row[7] else "estandar"
             })
         cur.close()
         conn.close()
@@ -609,7 +609,7 @@ def create_cliente():
         cur.execute("""
             INSERT INTO cliente (id_persona, telefono, direccion, rango, suscripcion)
             VALUES (%s, %s, %s, %s, %s) RETURNING id
-        """, (persona_id, data['telefono'], data['direccion'], data.get('rango', 'normal'), data.get('suscripcion', 'starter')))
+        """, (persona_id, data['telefono'], data['direccion'], data.get('rango', 'normal'), data.get('suscripcion', 'estandar')))
         new_id = cur.fetchone()[0]
         
         conn.commit()
@@ -623,7 +623,7 @@ def create_cliente():
             "telefono": data['telefono'],
             "direccion": data['direccion'],
             "rango": data.get('rango', 'normal'),
-            "suscripcion": data.get('suscripcion', 'starter')
+            "suscripcion": data.get('suscripcion', 'estandar')
         }})
     except Exception as e:
         if conn: conn.rollback()
@@ -651,7 +651,7 @@ def update_cliente(id):
         cur.execute("""
             UPDATE cliente SET telefono = %s, direccion = %s, rango = %s, suscripcion = %s
             WHERE id = %s
-        """, (data['telefono'], data['direccion'], data.get('rango', 'normal'), data.get('suscripcion', 'starter'), int(id)))
+        """, (data['telefono'], data['direccion'], data.get('rango', 'normal'), data.get('suscripcion', 'estandar'), int(id)))
         
         conn.commit()
         cur.close()

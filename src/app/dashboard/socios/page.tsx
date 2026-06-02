@@ -13,6 +13,7 @@ export default function SociosPage() {
   const [clientes, setClientes] = useState<any[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [empleados, setEmpleados] = useState<any[]>([]);
+  const [suscripciones, setSuscripciones] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,7 +29,7 @@ export default function SociosPage() {
     direccion: '',
     foto: '',
     rango: 'normal',
-    suscripcion: 'starter'
+    suscripcion: 'estandar'
   });
 
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -47,6 +48,11 @@ export default function SociosPage() {
       const data = await res.json();
       setClientes(data.clientes || []);
       setEmpleados(data.empleados || []);
+      
+      const resSubs = await fetch('/api/suscripciones');
+      const dataSubs = await resSubs.json();
+      setSuscripciones(dataSubs.suscripciones || []);
+
       setLoading(false);
     } catch (error) {
       console.error("Error fetching socios data", error);
@@ -133,7 +139,7 @@ export default function SociosPage() {
       direccion: '',
       foto: '',
       rango: 'normal',
-      suscripcion: 'starter'
+      suscripcion: 'estandar'
     });
     setPersonType('empleado');
     setEditingItem(null);
@@ -408,13 +414,13 @@ export default function SociosPage() {
                         <label className="block text-[10px] uppercase tracking-widest text-surface-600 font-bold mb-2">Nivel de Cliente</label>
                         <div className="flex space-x-3">
                           <button
-                            onClick={() => setFormData({ ...formData, rango: 'normal', suscripcion: 'starter' })}
+                            onClick={() => setFormData({ ...formData, rango: 'normal', suscripcion: 'estandar' })}
                             className={`flex-1 py-3 px-4 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-all ${formData.rango === 'normal' ? 'border-[#4da6ff] bg-[#4da6ff]/10 text-[#4da6ff]' : 'border-surface-400 text-surface-600'}`}
                           >
                             Normal
                           </button>
                           <button
-                            onClick={() => setFormData({ ...formData, rango: 'vip', suscripcion: 'enterprise' })}
+                            onClick={() => setFormData({ ...formData, rango: 'vip', suscripcion: 'platino' })}
                             className={`flex-1 py-3 px-4 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-all ${formData.rango === 'vip' ? 'border-primary bg-primary/10 text-primary' : 'border-surface-400 text-surface-600'}`}
                           >
                             Frecuente / VIP
@@ -425,19 +431,16 @@ export default function SociosPage() {
                       {formData.rango === 'normal' && (
                         <div>
                           <label className="block text-[10px] uppercase tracking-widest text-surface-600 font-bold mb-2">Tipo de Suscripción</label>
-                          <div className="flex space-x-3">
-                            <button
-                              onClick={() => setFormData({ ...formData, suscripcion: 'starter' })}
-                              className={`flex-1 py-2 px-4 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-all ${formData.suscripcion === 'starter' ? 'border-[#00C48C] bg-[#00C48C]/10 text-[#00C48C]' : 'border-surface-400 text-surface-600'}`}
-                            >
-                              Starter (2 Proy.)
-                            </button>
-                            <button
-                              onClick={() => setFormData({ ...formData, suscripcion: 'pro' })}
-                              className={`flex-1 py-2 px-4 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-all ${formData.suscripcion === 'pro' ? 'border-[#00C48C] bg-[#00C48C]/10 text-[#00C48C]' : 'border-surface-400 text-surface-600'}`}
-                            >
-                              Pro (Ilimitado)
-                            </button>
+                          <div className="flex flex-wrap gap-3">
+                            {suscripciones.map((sub: any) => (
+                              <button
+                                key={sub.nombre}
+                                onClick={() => setFormData({ ...formData, suscripcion: sub.nombre })}
+                                className={`flex-1 py-2 px-4 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-all min-w-[120px] ${formData.suscripcion === sub.nombre ? 'border-[#00C48C] bg-[#00C48C]/10 text-[#00C48C]' : 'border-surface-400 text-surface-600'}`}
+                              >
+                                {sub.nombre} ({sub.limite_proyectos === -1 ? 'Ilimitado' : sub.limite_proyectos + ' Proy.'})
+                              </button>
+                            ))}
                           </div>
                         </div>
                       )}

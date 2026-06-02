@@ -11,6 +11,17 @@ CREATE TABLE persona (
     email VARCHAR(100) UNIQUE NOT NULL --Aseguramos que no haya 2 o más personas dadas de alta con el mismo correo.
     );
 
+-- Creamos la tabla tipo_suscripcion
+CREATE TABLE tipo_suscripcion(
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(50) UNIQUE NOT NULL,
+    precio DECIMAL(10,2) NOT NULL,
+    descripcion TEXT,
+    caracteristicas JSONB,
+    limite_proyectos INT DEFAULT -1,
+    badge_text VARCHAR(50)
+);
+
 --Creamos la tabla Cliente
 CREATE TABLE cliente(
     id SERIAL PRIMARY KEY,
@@ -18,10 +29,13 @@ CREATE TABLE cliente(
     telefono VARCHAR(20) NOT NULL, 
     direccion VARCHAR(150) NOT NULL,
     rango VARCHAR(50) DEFAULT 'normal' CHECK(rango IN ('normal', 'vip')),
-    suscripcion VARCHAR(50) DEFAULT 'starter' CHECK(suscripcion IN ('starter', 'pro', 'enterprise')),
+    suscripcion VARCHAR(50) DEFAULT 'estandar',
 
 FOREIGN KEY(id_persona) REFERENCES persona(id)  -- Definimos la relación 1 a 1 en donde un cliente es una persona
 ON DELETE CASCADE
+ON UPDATE CASCADE,
+FOREIGN KEY(suscripcion) REFERENCES tipo_suscripcion(nombre)
+ON DELETE SET NULL
 ON UPDATE CASCADE
 );
 
@@ -1068,3 +1082,9 @@ INSERT INTO creador_ugc(id_persona, categoria, descripcion)
 VALUES(123, 'Estilo de Vida y Bienestar', 'Creador virtual especializado en contenido lifestyle');
 
 COMMIT;
+
+-- Insertar suscripciones por defecto
+INSERT INTO tipo_suscripcion (nombre, precio, descripcion, caracteristicas, limite_proyectos, badge_text) VALUES 
+('estandar', 499.00, 'Ideal para comenzar con tu primer proyecto.', '{"support": "Email", "analytics": "Básico", "storage": "5GB"}', 1, 'Básico'),
+('pro', 999.00, 'Perfecto para negocios en crecimiento.', '{"support": "24/7", "analytics": "Avanzado", "storage": "50GB"}', 5, 'Popular'),
+('platino', 1999.00, 'La solución completa para grandes empresas.', '{"support": "Prioritario", "analytics": "Personalizado", "storage": "Ilimitado"}', -1, 'Premium');

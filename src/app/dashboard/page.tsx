@@ -32,11 +32,7 @@ export default function Dashboard() {
     presupuestoUsado: 0,
     presupuestoTotal: 0,
     clientesActivos: 0,
-    suscripciones: {
-      starter: { count: 0, name: 'Starter', desc: '' },
-      pro: { count: 0, name: 'Pro', desc: '' },
-      enterprise: { count: 0, name: 'Enterprise', desc: '' }
-    }
+    suscripciones: [] as any[]
   });
   const [dbName, setDbName] = useState('nexovibe_bd');
 
@@ -58,6 +54,30 @@ export default function Dashboard() {
 
   const [clientSub, setClientSub] = useState(getClientSubscription());
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+
+  const [isCreateSubModalOpen, setIsCreateSubModalOpen] = useState(false);
+  const [newSubData, setNewSubData] = useState({
+    nombre: '',
+    precio: 0,
+    descripcion: '',
+    limite_proyectos: -1,
+    badge_text: ''
+  });
+
+  const handleCreateSubscription = async () => {
+    try {
+      await fetch('/api/suscripciones', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...newSubData, caracteristicas: {} })
+      });
+      setIsCreateSubModalOpen(false);
+      setNewSubData({ nombre: '', precio: 0, descripcion: '', limite_proyectos: -1, badge_text: '' });
+      fetchDashboardStats();
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const fetchDashboardStats = async () => {
     try {
@@ -105,7 +125,7 @@ export default function Dashboard() {
           presupuestoUsado: calcPresupuestoUsado,
           presupuestoTotal: calcPresupuestoTotal,
           clientesActivos: data.clientes_activos || 0,
-          suscripciones: data.suscripciones || { starter: { count: 0 }, pro: { count: 0 }, enterprise: { count: 0 } }
+          suscripciones: data.suscripciones || []
         });
       } else {
         setTotal(data.total);
@@ -120,7 +140,7 @@ export default function Dashboard() {
           presupuestoUsado: data.presupuesto_total_usado || 0,
           presupuestoTotal: data.presupuesto_total_asignado || 0,
           clientesActivos: data.clientes_activos || 0,
-          suscripciones: data.suscripciones || { starter: { count: 0 }, pro: { count: 0 }, enterprise: { count: 0 } }
+          suscripciones: data.suscripciones || []
         });
       }
 
@@ -252,48 +272,41 @@ export default function Dashboard() {
         {/* SUBSCRIPTIONS ROW */}
         {role !== 'cliente' ? (
           <div className="mb-6 bg-surface-200 border border-surface-400 rounded-2xl p-6 shadow-lg">
-            <div className="flex items-center mb-6">
-              <Target className="w-4 h-4 text-primary mr-2" />
-              <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">ESTADO DE SUSCRIPCIONES</h3>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <Target className="w-4 h-4 text-primary mr-2" />
+                <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">ESTADO DE SUSCRIPCIONES</h3>
+              </div>
+              {role === 'admin' && (
+                <button 
+                  onClick={() => setIsCreateSubModalOpen(true)}
+                  className="bg-primary hover:bg-red-600 text-white text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg transition-colors shadow-[0_0_15px_rgba(255,59,48,0.2)]"
+                >
+                  Crear Suscripción
+                </button>
+              )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-surface-300 border border-surface-400 rounded-xl p-5 relative overflow-hidden hover:border-surface-500 transition-colors">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs uppercase tracking-widest font-bold text-surface-500">Tier 1: Starter</span>
-                  <span className="bg-surface-400 text-white text-[10px] font-bold px-2 py-1 rounded">MÁX 2 PROY.</span>
-                </div>
-                <p className="text-surface-600 text-[10px] mb-4 h-8">Puede crear hasta 2 proyectos básicos en la plataforma.</p>
-                <div className="flex items-end">
-                  <h3 className="text-3xl font-black text-white">{metrics.suscripciones.starter?.count || 0}</h3>
-                  <span className="text-surface-500 text-xs ml-2 mb-1">clientes</span>
-                </div>
-              </div>
+              {metrics.suscripciones.map((sub: any, idx: number) => {
+                const isPremium = sub.precio > 1000;
+                const limitText = sub.limite_proyectos === -1 ? 'ILIMITADO' : `MÁX ${sub.limite_proyectos} PROY.`;
+                const themeColor = idx === 0 ? 'text-surface-500' : isPremium ? 'text-primary' : 'text-[#00C48C]';
+                const bgColor = idx === 0 ? 'bg-surface-400' : isPremium ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-[#00C48C]/20 text-[#00C48C] border border-[#00C48C]/30';
 
-              <div className="bg-surface-300 border border-surface-400 rounded-xl p-5 relative overflow-hidden hover:border-surface-500 transition-colors">
-                <div className="absolute top-0 right-0 w-16 h-16 bg-[#00C48C]/10 rounded-bl-full"></div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs uppercase tracking-widest font-bold text-[#00C48C]">Tier 2: Pro</span>
-                  <span className="bg-[#00C48C]/20 text-[#00C48C] border border-[#00C48C]/30 text-[10px] font-bold px-2 py-1 rounded">ILIMITADO</span>
-                </div>
-                <p className="text-surface-600 text-[10px] mb-4 h-8">Puede crear múltiples proyectos sin restricción de cantidad.</p>
-                <div className="flex items-end">
-                  <h3 className="text-3xl font-black text-white">{metrics.suscripciones.pro?.count || 0}</h3>
-                  <span className="text-surface-500 text-xs ml-2 mb-1">clientes</span>
-                </div>
-              </div>
-
-              <div className="bg-surface-300 border border-primary/50 rounded-xl p-5 relative overflow-hidden shadow-[0_0_15px_rgba(255,59,48,0.1)]">
-                <div className="absolute top-0 right-0 w-16 h-16 bg-primary/10 rounded-bl-full"></div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs uppercase tracking-widest font-bold text-primary">Tier 3: Enterprise</span>
-                  <span className="bg-primary/20 text-primary border border-primary/30 text-[10px] font-bold px-2 py-1 rounded flex items-center"><Target className="w-3 h-3 mr-1" /> VIP</span>
-                </div>
-                <p className="text-surface-600 text-[10px] mb-4 h-8">Todo de Tier 2 + contacto directo y alta eficiencia con empleados.</p>
-                <div className="flex items-end">
-                  <h3 className="text-3xl font-black text-white">{metrics.suscripciones.enterprise?.count || 0}</h3>
-                  <span className="text-surface-500 text-xs ml-2 mb-1">clientes</span>
-                </div>
-              </div>
+                return (
+                  <div key={sub.name} className="bg-surface-300 border border-surface-400 rounded-xl p-5 relative overflow-hidden hover:border-surface-500 transition-colors">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className={`text-xs uppercase tracking-widest font-bold ${themeColor}`}>{sub.name}</span>
+                      <span className={`${bgColor} text-[10px] font-bold px-2 py-1 rounded`}>{limitText}</span>
+                    </div>
+                    <p className="text-surface-600 text-[10px] mb-4 h-8">{sub.desc}</p>
+                    <div className="flex items-end">
+                      <h3 className="text-3xl font-black text-white">{sub.count}</h3>
+                      <span className="text-surface-500 text-xs ml-2 mb-1">clientes</span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         ) : (
@@ -794,35 +807,107 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                { tier: 'Starter', price: '$99/mo', desc: 'Ideal para individuos.', limit: '2 Proyectos' },
-                { tier: 'Pro', price: '$299/mo', desc: 'Para equipos en crecimiento.', limit: 'Ilimitado', highlight: true },
-                { tier: 'Enterprise', price: 'Personalizado', desc: 'Solución corporativa.', limit: 'Ilimitado + VIP' }
-              ].map(plan => (
+              {metrics.suscripciones.map((plan: any) => {
+                const limitText = plan.limite_proyectos === -1 ? 'Ilimitado' : `${plan.limite_proyectos} Proyectos`;
+                const isPremium = plan.precio > 1000;
+                return (
                 <div 
-                  key={plan.tier} 
-                  className={`bg-surface-300 border rounded-xl p-6 relative overflow-hidden flex flex-col justify-between transition-transform transform hover:scale-105 cursor-pointer ${plan.highlight ? 'border-primary shadow-[0_0_20px_rgba(255,59,48,0.2)]' : 'border-surface-400 hover:border-surface-500'}`}
-                  onClick={() => {
-                    const newSub = upgradeClientSubscription(plan.tier);
-                    setClientSub(newSub);
-                    setIsUpgradeModalOpen(false);
-                    // Fetch to re-render local if necessary, but we are good.
+                  key={plan.name} 
+                  className={`bg-surface-300 border rounded-xl p-6 relative overflow-hidden flex flex-col justify-between transition-transform transform hover:scale-105 cursor-pointer ${isPremium ? 'border-primary shadow-[0_0_20px_rgba(255,59,48,0.2)]' : 'border-surface-400 hover:border-surface-500'}`}
+                  onClick={async () => {
+                    try {
+                      await fetch('/api/clientes/subscribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: user?.email, suscripcion: plan.name })
+                      });
+                      const newSub = upgradeClientSubscription(plan.name);
+                      setClientSub(newSub);
+                      setIsUpgradeModalOpen(false);
+                      fetchDashboardStats();
+                    } catch (e) {
+                      console.error(e);
+                    }
                   }}
                 >
-                  {plan.highlight && <div className="absolute top-0 right-0 bg-primary text-white text-[8px] font-black uppercase px-2 py-1 rounded-bl-lg">RECOMENDADO</div>}
+                  {isPremium && <div className="absolute top-0 right-0 bg-primary text-white text-[8px] font-black uppercase px-2 py-1 rounded-bl-lg">RECOMENDADO</div>}
                   <div>
-                    <h3 className="text-lg font-black text-white uppercase tracking-wider mb-1">{plan.tier}</h3>
-                    <p className="text-2xl font-bold text-white mb-4">{plan.price}</p>
+                    <h3 className="text-lg font-black text-white uppercase tracking-wider mb-1">{plan.name}</h3>
+                    <p className="text-2xl font-bold text-white mb-4">${plan.precio}/mo</p>
                     <p className="text-surface-500 text-xs mb-4">{plan.desc}</p>
                     <div className="bg-surface-100 p-2 rounded text-[10px] text-surface-600 uppercase font-bold text-center border border-surface-400">
-                      Límite: <span className="text-white">{plan.limit}</span>
+                      Límite: <span className="text-white">{limitText}</span>
                     </div>
                   </div>
-                  <button className={`w-full mt-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors ${plan.highlight ? 'bg-primary hover:bg-red-600 text-white' : 'bg-surface-400 hover:bg-surface-500 text-white'}`}>
-                    {clientSub.tier === plan.tier ? 'Plan Actual' : 'Seleccionar'}
+                  <button className={`w-full mt-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors ${isPremium ? 'bg-primary hover:bg-red-600 text-white' : 'bg-surface-400 hover:bg-surface-500 text-white'}`}>
+                    {clientSub.tier === plan.name ? 'Plan Actual' : 'Seleccionar'}
                   </button>
                 </div>
-              ))}
+              )})}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Create Subscription */}
+      {isCreateSubModalOpen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-surface-200 border border-surface-400 rounded-2xl p-8 w-full max-w-lg shadow-2xl relative">
+            <button
+              onClick={() => setIsCreateSubModalOpen(false)}
+              className="absolute top-4 right-4 text-surface-500 hover:text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="mb-8 text-center">
+              <h2 className="text-2xl font-bold uppercase tracking-wider text-white mb-2" style={{ fontFamily: 'var(--font-unbounded)' }}>
+                CREAR SUSCRIPCIÓN
+              </h2>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs uppercase tracking-widest text-surface-500 mb-1">Nombre</label>
+                <input 
+                  type="text" 
+                  value={newSubData.nombre} 
+                  onChange={(e) => setNewSubData({...newSubData, nombre: e.target.value})}
+                  className="w-full bg-surface-100 border border-surface-400 rounded p-2 text-white" 
+                  placeholder="ej. Básico" 
+                />
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-widest text-surface-500 mb-1">Precio</label>
+                <input 
+                  type="number" 
+                  value={newSubData.precio} 
+                  onChange={(e) => setNewSubData({...newSubData, precio: parseFloat(e.target.value)})}
+                  className="w-full bg-surface-100 border border-surface-400 rounded p-2 text-white" 
+                />
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-widest text-surface-500 mb-1">Descripción</label>
+                <input 
+                  type="text" 
+                  value={newSubData.descripcion} 
+                  onChange={(e) => setNewSubData({...newSubData, descripcion: e.target.value})}
+                  className="w-full bg-surface-100 border border-surface-400 rounded p-2 text-white" 
+                />
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-widest text-surface-500 mb-1">Límite Proyectos (-1 ilimitado)</label>
+                <input 
+                  type="number" 
+                  value={newSubData.limite_proyectos} 
+                  onChange={(e) => setNewSubData({...newSubData, limite_proyectos: parseInt(e.target.value, 10)})}
+                  className="w-full bg-surface-100 border border-surface-400 rounded p-2 text-white" 
+                />
+              </div>
+              <button 
+                onClick={handleCreateSubscription}
+                className="w-full mt-6 bg-primary hover:bg-red-600 text-white font-bold uppercase tracking-widest py-3 rounded-lg transition-colors"
+              >
+                Crear
+              </button>
             </div>
           </div>
         </div>

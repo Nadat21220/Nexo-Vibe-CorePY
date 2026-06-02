@@ -126,15 +126,21 @@ export async function GET() {
     );
 
     const clientesActivos = clientesResult.rowCount || 0;
-    const starterCount = clientesResult.rows.filter((c) => c.suscripcion === 'starter' && c.rango !== 'vip').length;
-    const proCount = clientesResult.rows.filter((c) => c.suscripcion === 'pro').length;
-    const enterpriseCount = clientesResult.rows.filter((c) => c.suscripcion === 'enterprise' || c.rango === 'vip').length;
+    const suscripcionesResult = await query<{ nombre: string; descripcion: string; precio: string; badge_text: string; client_count: string }>(
+      `SELECT ts.nombre, ts.descripcion, ts.precio, ts.badge_text, COUNT(c.id) as client_count
+       FROM tipo_suscripcion ts
+       LEFT JOIN cliente c ON ts.nombre = c.suscripcion
+       GROUP BY ts.nombre, ts.descripcion, ts.precio, ts.badge_text
+       ORDER BY ts.precio ASC`
+    );
 
-    const suscripciones = {
-      starter: { count: starterCount, name: 'Starter', desc: 'Max 2 proyectos' },
-      pro: { count: proCount, name: 'Pro', desc: 'Proyectos ilimitados' },
-      enterprise: { count: enterpriseCount, name: 'Enterprise', desc: 'Soporte VIP' }
-    };
+    const suscripciones = suscripcionesResult.rows.map(row => ({
+      name: row.nombre,
+      desc: row.descripcion,
+      count: parseInt(row.client_count, 10) || 0,
+      precio: parseFloat(row.precio),
+      badgeText: row.badge_text
+    }));
 
     return NextResponse.json({
       completadas,
@@ -170,11 +176,7 @@ export async function GET() {
       presupuesto_total_usado: 0,
       progreso_promedio: 0,
       clientes_activos: clientes.length,
-      suscripciones: {
-        starter: { count: 0, name: 'Starter', desc: 'Max 2 proyectos' },
-        pro: { count: 0, name: 'Pro', desc: 'Proyectos ilimitados' },
-        enterprise: { count: 0, name: 'Enterprise', desc: 'Soporte VIP' }
-      },
+      suscripciones: [],
       dbName: process.env.DB_NAME || 'nexovibe_bd'
     });
   }
