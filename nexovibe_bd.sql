@@ -972,7 +972,37 @@ WITH tecnologias_por_proyecto AS (
 )
 SELECT *
 FROM tecnologias_por_proyecto
-WHERE cant_tecnologias > 1;
+WHERE cant_tecnologias > 1
+ORDER BY cant_tecnologias DESC;
+
+
+--QUERY 8: Mostrar los empleados que participan en más proyectos que el promedio de todos los empleados
+WITH proyectos_por_empleado AS (
+    SELECT
+        e.id,
+        p.nombre,
+        p.apellido,
+        COUNT(ep.id_proyecto) AS total_proyectos
+    FROM empleado e
+    JOIN persona p
+        ON p.id = e.id_persona
+    JOIN empleado_proyecto ep
+        ON ep.id_empleado = e.id
+    GROUP BY e.id, p.nombre, p.apellido
+),
+promedio_proyectos AS (
+    SELECT AVG(total_proyectos) AS promedio
+    FROM proyectos_por_empleado
+)
+
+SELECT
+    pe.nombre,
+    pe.apellido,
+    pe.total_proyectos
+FROM proyectos_por_empleado pe
+CROSS JOIN promedio_proyectos pp
+WHERE pe.total_proyectos > pp.promedio
+ORDER BY pe.total_proyectos DESC;
 
 
 -- En esta sección creamos 3 tipos de reportes, uno general de la base de datos,
